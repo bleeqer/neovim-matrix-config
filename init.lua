@@ -10,7 +10,19 @@ vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.cursorline = true
 vim.opt.scrolloff = 8
-vim.opt.clipboard = "unnamedplus"
+vim.g.clipboard = {
+  name = "xclip",
+  copy = {
+    ["+"] = "xclip -selection clipboard",
+    ["*"] = "xclip -selection primary",
+  },
+  paste = {
+    ["+"] = "xclip -selection clipboard -o",
+    ["*"] = "xclip -selection primary -o",
+  },
+  cache_enabled = 0,
+}
+
 
 -- ========================
 -- lazy.nvim 설치 확인
@@ -130,7 +142,7 @@ vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Help tag
 -- ========================
 require("nvim-treesitter.configs").setup {
   ensure_installed = { "c", "cpp", "lua", "vim", "bash", "python" },
-  highlight = { enable = true }
+  highlight = { enable = false }
 }
 
 -- 터미널 모드에서 ESC 누르면 normal 모드 전환
@@ -166,4 +178,4 @@ vim.api.nvim_create_user_command("Xa", cleanup_and_quit, {})
 vim.cmd([[
   cnoreabbrev <expr> xa   (getcmdtype() == ':' && getcmdline() ==# 'xa')   ? 'Xa' : 'xa'
   cnoreabbrev <expr> wqa  (getcmdtype() == ':' && getcmdline() ==# 'wqa')  ? 'Xa' : 'wqa'
-]])
+D]])

@@ -29,8 +29,11 @@ vim.g.clipboard = {
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
-    "git", "clone", "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git", lazypath,
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    lazypath,
   })
 end
 vim.opt.rtp:prepend(lazypath)
@@ -60,21 +63,14 @@ require("lazy").setup({
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = { "zbirenbaum/copilot.lua" },
     build = "make tiktoken",
-    lazy = false,
+    lazy = false, -- force load on startup
     opts = {
       debug = false,
-      window = {
-        layout = "vertical",
-        size = 0.25,
-        position = "right",
-      },
       mappings = {
         submit_prompt = { normal = "<CR>", insert = "<CR>" },
       },
     },
   },
-
-  { "sindrets/winshift.nvim" }, -- 🔑 to move CopilotChat to the right
 
 })
 
@@ -150,12 +146,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
         break
       end
     end
-
     -- 1. File buffer (center anchor)
     if file_buf then
       vim.api.nvim_set_current_buf(file_buf)
-    else
-      vim.cmd("enew")
     end
 
     -- 2. File manager (left)
@@ -165,19 +158,16 @@ vim.api.nvim_create_autocmd("VimEnter", {
       vim.cmd("wincmd l") -- back to file
     end)
 
-    -- 3. CopilotChat (right, moved with WinShift)
+    -- 3. CopilotChat (right, but opens where it wants)
     vim.schedule(function()
       vim.cmd("CopilotChat")
-      vim.cmd("WinShift far_right") -- force CopilotChat to the far right
-      vim.cmd("wincmd h")           -- back to file
-      vim.cmd("stopinsert")
+      vim.cmd("wincmd h") -- back to file
     end)
 
     -- 4. Terminal (bottom)
     vim.schedule(function()
       vim.cmd("ToggleTerm")
       vim.cmd("wincmd k") -- back to file
-      vim.cmd("stopinsert")
     end)
   end
 })

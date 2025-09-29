@@ -133,8 +133,48 @@ vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Help tag
 -- ========================
 require("nvim-treesitter.configs").setup {
   ensure_installed = { "c", "cpp", "lua", "vim", "bash", "python" },
-  highlight = { enable = false }
+  highlight = { enable = true }
 }
+local function CopilotChatFunction()
+  local ts_utils = require("nvim-treesitter.ts_utils")
+  local node = ts_utils.get_node_at_cursor()
+
+  if not node then
+    print("No syntax node at cursor")
+    return
+  end
+
+  while node and node:type() ~= "function_definition" and node:type() ~= "function_declaration" do
+    node = node:parent()
+  end
+
+  if not node then
+    print("No function found at cursor")
+    return
+  end
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local start_row, _, end_row, _ = node:range()
+  local lines = vim.api.nvim_buf_get_lines(bufnr, start_row, end_row + 1, false)
+
+  vim.cmd("CopilotChat")
+
+  local chat_buf = vim.api.nvim_get_current_buf()
+  local last_line = vim.api.nvim_buf_line_count(chat_buf)
+  vim.api.nvim_buf_set_lines(chat_buf, last_line, last_line, false, { "" })
+  vim.api.nvim_buf_set_lines(chat_buf, last_line + 1, last_line + 1, false, lines)
+
+  -- 맨 아래 + "Now my question:" + 줄 하나 더
+  local line_count = vim.api.nvim_buf_line_count(chat_buf)
+  vim.api.nvim_buf_set_lines(chat_buf, line_count, line_count, false, { "", "Now my question:", "" })
+  vim.api.nvim_win_set_cursor(0, {line_count + 3, 0})
+
+  -- 자동 인서트 모드 진입
+  vim.cmd("startinsert")
+end
+
+-- 키맵핑: Ctrl+f
+vim.keymap.set("n", "<C-f>", CopilotChatFunction, { noremap = true, silent = true })
 
 -- ========================
 -- Startup layout

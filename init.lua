@@ -89,12 +89,13 @@ require("lualine").setup {
 -- ========================
 require("toggleterm").setup {
   size = 15,
-  open_mapping = [[<leader>t]], -- 스페이스+t
+  open_mapping = [[<C-t>]], -- Ctrl+t
   direction = "horizontal",
   start_in_insert = true,
   persist_size = true,
   close_on_exit = true,
 }
+
 
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()

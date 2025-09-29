@@ -121,7 +121,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
         vim.api.nvim_set_current_buf(file_buf)
         -- schedule 한 번 더 감싸서 확실히 이동
         vim.schedule(function()
-          vim.cmd("normal! G")
+          vim.cmd("stopinsert | normal! G")
         end)
       end)
     end

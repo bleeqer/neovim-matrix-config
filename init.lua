@@ -3,13 +3,14 @@
 -- ========================
 vim.g.mapleader = " "
 vim.opt.number = true
-vim.opt.relativenumber = true
+vim.opt.relativenumber = false
 vim.opt.termguicolors = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.cursorline = true
 vim.opt.scrolloff = 8
+vim.opt.splitright = true     
 vim.g.clipboard = {
   name = "xclip",
   copy = {
@@ -22,7 +23,6 @@ vim.g.clipboard = {
   },
   cache_enabled = 0,
 }
-
 -- ========================
 -- lazy.nvim 설치 확인
 -- ========================
@@ -55,26 +55,6 @@ require("lazy").setup({
   { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
 
   { "akinsho/toggleterm.nvim", version = "*" },
-
-  {
-    "CopilotC-Nvim/CopilotChat.nvim",
-    dependencies = { "zbirenbaum/copilot.lua" },
-    build = "make tiktoken",
-    lazy = false,
-    opts = {
-      debug = false,
-      window = {
-        layout = "vertical",
-        size = 0.25,
-        position = "right",
-      },
-      mappings = {
-        submit_prompt = { normal = "<CR>", insert = "<CR>" },
-      },
-    },
-  },
-
-  { "sindrets/winshift.nvim" }, -- 🔑 to move CopilotChat to the right
 
 })
 
@@ -135,88 +115,23 @@ require("nvim-treesitter.configs").setup {
   ensure_installed = { "c", "cpp", "lua", "vim", "bash", "python" },
   highlight = { enable = true }
 }
-local function CopilotChatFunction()
-  local ts_utils = require("nvim-treesitter.ts_utils")
-  local node = ts_utils.get_node_at_cursor()
-
-  if not node then
-    print("No syntax node at cursor")
-    return
-  end
-
-  while node and node:type() ~= "function_definition" and node:type() ~= "function_declaration" do
-    node = node:parent()
-  end
-
-  if not node then
-    print("No function found at cursor")
-    return
-  end
-
-  local bufnr = vim.api.nvim_get_current_buf()
-  local start_row, _, end_row, _ = node:range()
-  local lines = vim.api.nvim_buf_get_lines(bufnr, start_row, end_row + 1, false)
-
-  vim.cmd("CopilotChat")
-
-  local chat_buf = vim.api.nvim_get_current_buf()
-  local last_line = vim.api.nvim_buf_line_count(chat_buf)
-  vim.api.nvim_buf_set_lines(chat_buf, last_line, last_line, false, { "" })
-  vim.api.nvim_buf_set_lines(chat_buf, last_line + 1, last_line + 1, false, lines)
-
-  -- 맨 아래 + "Now my question:" + 줄 하나 더
-  local line_count = vim.api.nvim_buf_line_count(chat_buf)
-  vim.api.nvim_buf_set_lines(chat_buf, line_count, line_count, false, { "", "Now my question:", "" })
-  vim.api.nvim_win_set_cursor(0, {line_count + 3, 0})
-
-  -- 자동 인서트 모드 진입
-  vim.cmd("startinsert")
-end
-
--- 키맵핑: Ctrl+f
-vim.keymap.set("n", "<C-f>", CopilotChatFunction, { noremap = true, silent = true })
 
 -- ========================
--- Startup layout
+-- NvimEnter: nvim-tree, term
 -- ========================
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
-    local file_buf = nil
-    for _, b in ipairs(vim.fn.getbufinfo()) do
-      local name = b.name
-      local is_file = (name ~= "" and vim.loop.fs_stat(name) ~= nil)
-      if vim.bo[b.bufnr].buftype == "" and vim.bo[b.bufnr].buflisted and is_file then
-        file_buf = b.bufnr
-        break
-      end
-    end
-
-    -- 1. File buffer (center anchor)
-    if file_buf then
-      vim.api.nvim_set_current_buf(file_buf)
-    else
-      vim.cmd("enew")
-    end
-
-    -- 2. File manager (left)
+    -- File manager (left)
     vim.schedule(function()
       require("nvim-tree").setup({ view = { width = 40 } })
       require("nvim-tree.api").tree.open()
       vim.cmd("wincmd l") -- back to file
     end)
 
-    -- 3. CopilotChat (right, moved with WinShift)
-    vim.schedule(function()
-      vim.cmd("CopilotChat")
-      vim.cmd("WinShift far_right") -- force CopilotChat to the far right
-      vim.cmd("wincmd h")           -- back to file
-      vim.cmd("stopinsert")
-    end)
-
-    -- 4. Terminal (bottom)
+    -- Terminal (bottom)
     vim.schedule(function()
       vim.cmd("ToggleTerm")
-      vim.cmd("wincmd k") -- back to file
+      vim.cmd("wincmd k")
       vim.cmd("stopinsert")
     end)
   end

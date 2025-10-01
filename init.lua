@@ -280,13 +280,70 @@ vim.cmd([[
   cnoreabbrev <expr> xa   (getcmdtype() == ':' && getcmdline() ==# 'xa')   ? 'Xa' : 'xa'
   cnoreabbrev <expr> wqa  (getcmdtype() == ':' && getcmdline() ==# 'wqa')  ? 'Xa' : 'wqa'
 ]])
-vim.api.nvim_create_user_command("Memo", function()
-  vim.cmd("vnew")
-  vim.bo.buftype = "nofile"
-  vim.bo.bufhidden = "hide"
-  vim.bo.swapfile = false
-  vim.bo.buflisted = false
-  vim.bo.filetype = "memo"
-end, {})
+
+
+-- ========================
+-- Memo buffer (scratchpad)
+-- ========================
+local memo_bufnr = nil
+local memo_file = vim.fn.stdpath("config") .. "/memo.md"
+
+-- 메모 열기
+local function open_memo()
+  if memo_bufnr and vim.api.nvim_buf_is_valid(memo_bufnr) then
+    local win = vim.fn.bufwinid(memo_bufnr)
+    if win ~= -1 then
+      vim.api.nvim_set_current_win(win)
+      return
+    end
+  end
+
+  -- 파일로 열기 (이제 buftype=normal)
+  vim.cmd("vnew " .. memo_file)
+  memo_bufnr = vim.api.nvim_get_current_buf()
+
+  vim.bo[memo_bufnr].swapfile = false
+  vim.bo[memo_bufnr].buflisted = false
+  vim.bo[memo_bufnr].filetype = "markdown"
+
+  -- 자동 저장
+  vim.api.nvim_create_autocmd({ "TextChanged", "InsertLeave" }, {
+    buffer = memo_bufnr,
+    callback = function()
+      if vim.api.nvim_buf_is_valid(memo_bufnr) then
+        vim.api.nvim_buf_call(memo_bufnr, function()
+          vim.cmd("silent write! " .. memo_file)
+        end)
+      end
+    end,
+  })
+end
+
+
+-- 메모 닫기
+local function close_memo()
+  if memo_bufnr and vim.api.nvim_buf_is_valid(memo_bufnr) then
+    local win = vim.fn.bufwinid(memo_bufnr)
+    if win ~= -1 then
+      vim.api.nvim_win_close(win, true)
+    end
+    memo_bufnr = nil
+  end
+end
+
+-- 토글
+local function toggle_memo()
+  if memo_bufnr and vim.api.nvim_buf_is_valid(memo_bufnr) then
+    local win = vim.fn.bufwinid(memo_bufnr)
+    if win ~= -1 then
+      close_memo()
+      return
+    end
+  end
+  open_memo()
+end
+
+-- Ctrl+m 으로 토글
+vim.keymap.set("n", "<C-n>", toggle_memo, { desc = "Toggle memo buffer" })
 
 

@@ -39,29 +39,83 @@ vim.opt.rtp:prepend(lazypath)
 -- 플러그인 목록
 -- ========================
 require("lazy").setup({
+{
+  -- 상태바
+  "nvim-lualine/lualine.nvim",
 
-  { "nvim-lualine/lualine.nvim" },
-
+  -- 파일 매니저 (neo-tree)
   {
-    "nvim-tree/nvim-tree.lua",
-    dependencies = { "nvim-tree/nvim-web-devicons" }
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+    },
+    config = function()
+      require("neo-tree").setup({
+        close_if_last_window = true,
+        enable_git_status = true,
+        enable_diagnostics = true,
+        window = {
+          width = 40,
+          position = "left",
+        },
+        filesystem = {
+          filtered_items = {
+            hide_dotfiles = false,
+            hide_gitignored = true,
+          },
+          follow_current_file = { enabled = true },
+          use_libuv_file_watcher = true,
+        },
+      })
+
+      -- 단축키
+      vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle NeoTree" })
+      vim.keymap.set("n", "<leader>o", ":Neotree focus<CR>", { desc = "Focus NeoTree" })
+
+      -- nvim 시작할 때 자동 실행
+      vim.api.nvim_create_autocmd("VimEnter", {
+        callback = function()
+          vim.cmd("Neotree show")
+        end,
+      })
+    end,
   },
 
+  -- Telescope + fzf-native
   {
     "nvim-telescope/telescope.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" }
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    },
+    config = function()
+      require("telescope").setup({})
+      require("telescope").load_extension("fzf")
+      -- 단축키
+      vim.keymap.set("n", "<leader>ff", ":Telescope find_files<CR>", { desc = "Find files" })
+      vim.keymap.set("n", "<leader>fg", ":Telescope live_grep<CR>", { desc = "Live grep" })
+      vim.keymap.set("n", "<leader>fb", ":Telescope buffers<CR>", { desc = "Find buffers" })
+      vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Help tags" })
+    end,
   },
 
+  -- Treesitter
   { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
 
+  -- ToggleTerm
   { "akinsho/toggleterm.nvim", version = "*" },
 
+  -- Autopairs
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
     config = true,
   },
 
+  -- Tabout
   {
     "abecodes/tabout.nvim",
     dependencies = { "nvim-treesitter", "nvim-cmp" },
@@ -76,9 +130,7 @@ require("lazy").setup({
     end,
   },
 
-  -- ============ 빵빵하게 추가하는 부분 ============
-
-  -- 자동완성 엔진
+  -- 자동완성
   {
     "hrsh7th/nvim-cmp",
     dependencies = {
@@ -92,7 +144,7 @@ require("lazy").setup({
     },
   },
 
-  -- LSP 설정
+  -- LSP
   {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -101,33 +153,31 @@ require("lazy").setup({
     },
   },
 
-  -- Git 관련
+  -- Git
   { "lewis6991/gitsigns.nvim" },
 
-  -- Fuzzy finder 더 빠르게
-  { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-
-  -- Surround 편집
+  -- Surround
   { "kylechui/nvim-surround", version = "*" },
 
-  -- Comment 토글
+  -- Comment
   { "numToStr/Comment.nvim", opts = {} },
 
-  -- Indent 가이드라인
+  -- Indent 가이드
   { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
 
-  -- 색상 하이라이트 (#RRGGBB)
+  -- 색상 하이라이트
   { "norcalli/nvim-colorizer.lua" },
 
-  -- 파일 탐색/심볼 아웃라인
+  -- 심볼 아웃라인
   { "simrat39/symbols-outline.nvim" },
 
-  -- 상태 보기 (디버그/테스트 시 좋음)
+  -- Notify
   { "rcarriga/nvim-notify" },
 
-  -- 편집 보조: autopairs 강화
+  -- HTML/XML 자동 태그 닫기
   { "windwp/nvim-ts-autotag", opts = {} },
 
+}
 })
 
 -- ========================
@@ -193,13 +243,6 @@ require("nvim-treesitter.configs").setup {
 -- ========================
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
-    -- File manager (left)
-    vim.schedule(function()
-      require("nvim-tree").setup({ view = { width = 40 } })
-      require("nvim-tree.api").tree.open()
-      vim.cmd("wincmd l") -- back to file
-    end)
-
     -- Terminal (bottom)
     vim.schedule(function()
       vim.cmd("ToggleTerm")

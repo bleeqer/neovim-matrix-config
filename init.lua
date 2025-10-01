@@ -56,6 +56,78 @@ require("lazy").setup({
 
   { "akinsho/toggleterm.nvim", version = "*" },
 
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    config = true,
+  },
+
+  {
+    "abecodes/tabout.nvim",
+    dependencies = { "nvim-treesitter", "nvim-cmp" },
+    config = function()
+      require("tabout").setup({
+        tabkey = "<Tab>",
+        backwards_tabkey = "<S-Tab>",
+        act_as_tab = true,
+        enable_backwards = true,
+        completion = false,
+      })
+    end,
+  },
+
+  -- ============ 빵빵하게 추가하는 부분 ============
+
+  -- 자동완성 엔진
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "hrsh7th/cmp-buffer",
+      "hrsh7th/cmp-path",
+      "hrsh7th/cmp-cmdline",
+      "L3MON4D3/LuaSnip",
+      "saadparwaiz1/cmp_luasnip",
+      "rafamadriz/friendly-snippets",
+    },
+  },
+
+  -- LSP 설정
+  {
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
+    },
+  },
+
+  -- Git 관련
+  { "lewis6991/gitsigns.nvim" },
+
+  -- Fuzzy finder 더 빠르게
+  { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+
+  -- Surround 편집
+  { "kylechui/nvim-surround", version = "*" },
+
+  -- Comment 토글
+  { "numToStr/Comment.nvim", opts = {} },
+
+  -- Indent 가이드라인
+  { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
+
+  -- 색상 하이라이트 (#RRGGBB)
+  { "norcalli/nvim-colorizer.lua" },
+
+  -- 파일 탐색/심볼 아웃라인
+  { "simrat39/symbols-outline.nvim" },
+
+  -- 상태 보기 (디버그/테스트 시 좋음)
+  { "rcarriga/nvim-notify" },
+
+  -- 편집 보조: autopairs 강화
+  { "windwp/nvim-ts-autotag", opts = {} },
+
 })
 
 -- ========================

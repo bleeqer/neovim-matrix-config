@@ -280,4 +280,13 @@ vim.cmd([[
   cnoreabbrev <expr> xa   (getcmdtype() == ':' && getcmdline() ==# 'xa')   ? 'Xa' : 'xa'
   cnoreabbrev <expr> wqa  (getcmdtype() == ':' && getcmdline() ==# 'wqa')  ? 'Xa' : 'wqa'
 ]])
+vim.api.nvim_create_user_command("Memo", function()
+  vim.cmd("vnew")
+  vim.bo.buftype = "nofile"
+  vim.bo.bufhidden = "hide"
+  vim.bo.swapfile = false
+  vim.bo.buflisted = false
+  vim.bo.filetype = "memo"
+end, {})
+
 

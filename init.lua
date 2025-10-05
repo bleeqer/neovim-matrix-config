@@ -213,9 +213,9 @@ require("lualine").setup {
 -- ToggleTerm
 -- ========================
 require("toggleterm").setup {
-  size = vim.o.columns * 0.333,
+  size = vim.o.lines * 0.5,
   open_mapping = [[<C-t>]],
-  direction = "vertical",
+  direction = "horizontal",
   start_in_insert = true,
   persist_size = true,
   close_on_exit = true,

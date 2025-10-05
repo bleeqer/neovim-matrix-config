@@ -58,7 +58,7 @@ require("lazy").setup({
         enable_git_status = true,
         enable_diagnostics = true,
         window = {
-          width = vim.o.columns * 0.333,
+          width = 50,
           position = "left",
         },
         filesystem = {

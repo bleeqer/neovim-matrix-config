@@ -213,7 +213,7 @@ require("lualine").setup {
 -- ToggleTerm
 -- ========================
 require("toggleterm").setup {
-  size = 15,
+  size = 30,
   open_mapping = [[<C-t>]],
   direction = "horizontal",
   start_in_insert = true,

@@ -58,7 +58,7 @@ require("lazy").setup({
         enable_git_status = true,
         enable_diagnostics = true,
         window = {
-          width = 40,
+          width = 50,
           position = "left",
         },
         filesystem = {
@@ -213,9 +213,9 @@ require("lualine").setup {
 -- ToggleTerm
 -- ========================
 require("toggleterm").setup {
-  size = 30,
+  size = 50,
   open_mapping = [[<C-t>]],
-  direction = "horizontal",
+  direction = "vertical",
   start_in_insert = true,
   persist_size = true,
   close_on_exit = true,

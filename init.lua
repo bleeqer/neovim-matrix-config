@@ -58,7 +58,7 @@ require("lazy").setup({
         enable_git_status = true,
         enable_diagnostics = true,
         window = {
-          width = 50,
+          width = vim.o.columns * 0.333,
           position = "left",
         },
         filesystem = {
@@ -213,7 +213,7 @@ require("lualine").setup {
 -- ToggleTerm
 -- ========================
 require("toggleterm").setup {
-  size = 50,
+  size = vim.o.columns * 0.333,
   open_mapping = [[<C-t>]],
   direction = "vertical",
   start_in_insert = true,

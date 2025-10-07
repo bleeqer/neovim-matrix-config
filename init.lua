@@ -1,3 +1,4 @@
+
 -- ========================
 -- 기본 옵션
 -- ========================
@@ -43,70 +44,8 @@ require("lazy").setup({
   -- 상태바
   "nvim-lualine/lualine.nvim",
 
-  -- 파일 매니저 (neo-tree)
-  {
-    "nvim-neo-tree/neo-tree.nvim",
-    branch = "v3.x",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons",
-      "MunifTanjim/nui.nvim",
-    },
-    config = function()
-      require("neo-tree").setup({
-        close_if_last_window = true,
-        enable_git_status = true,
-        enable_diagnostics = true,
-        window = {
-          width = 50,
-          position = "left",
-        },
-        filesystem = {
-          filtered_items = {
-            hide_dotfiles = false,
-            hide_gitignored = true,
-          },
-          follow_current_file = { enabled = true },
-          use_libuv_file_watcher = true,
-        },
-      })
-
-      -- 단축키
-      vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle NeoTree" })
-      vim.keymap.set("n", "<leader>o", ":Neotree focus<CR>", { desc = "Focus NeoTree" })
-
-      -- nvim 시작할 때 자동 실행
-      vim.api.nvim_create_autocmd("VimEnter", {
-        callback = function()
-          vim.cmd("Neotree show")
-        end,
-      })
-    end,
-  },
-
-  -- Telescope + fzf-native
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-    },
-    config = function()
-      require("telescope").setup({})
-      require("telescope").load_extension("fzf")
-      -- 단축키
-      vim.keymap.set("n", "<leader>ff", ":Telescope find_files<CR>", { desc = "Find files" })
-      vim.keymap.set("n", "<leader>fg", ":Telescope live_grep<CR>", { desc = "Live grep" })
-      vim.keymap.set("n", "<leader>fb", ":Telescope buffers<CR>", { desc = "Find buffers" })
-      vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Help tags" })
-    end,
-  },
-
   -- Treesitter
   { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
-
-  -- ToggleTerm
-  { "akinsho/toggleterm.nvim", version = "*" },
 
   -- Autopairs
   {
@@ -210,34 +149,29 @@ require("lualine").setup {
 }
 
 -- ========================
--- ToggleTerm
--- ========================
-require("toggleterm").setup {
-  size = 35,
-  open_mapping = [[<C-t>]],
-  direction = "horizontal",
-  start_in_insert = true,
-  persist_size = true,
-  close_on_exit = true,
-}
-
--- ========================
--- Telescope
--- ========================
-require("telescope").setup{}
-vim.keymap.set("n", "<leader>ff", ":Telescope find_files<CR>", { desc = "Find files" })
-vim.keymap.set("n", "<leader>fg", ":Telescope live_grep<CR>", { desc = "Live grep" })
-vim.keymap.set("n", "<leader>fb", ":Telescope buffers<CR>", { desc = "Find buffers" })
-vim.keymap.set("n", "<leader>fh", ":Telescope help_tags<CR>", { desc = "Help tags" })
-
--- ========================
 -- Treesitter
 -- ========================
 require("nvim-treesitter.configs").setup {
   ensure_installed = { "c", "cpp", "lua", "vim", "bash", "python" },
   highlight = { enable = true }
 }
+local cmp = require('cmp')
+require('luasnip.loaders.from_vscode').lazy_load()
 
+cmp.setup({
+  sources = {
+    {name = 'nvim_lsp'},
+    {name = 'luasnip'},
+  },
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
+ mapping = cmp.mapping.preset.insert({   
+    ['<CR>'] = cmp.mapping.confirm({select = true}),
+  })
+})
 -- ========================
 -- NvimEnter: nvim-tree, term
 -- ========================
@@ -245,18 +179,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
     -- Terminal (bottom)
     vim.schedule(function()
-      vim.cmd("ToggleTerm")
       vim.cmd("wincmd k")
       vim.cmd("stopinsert")
     end)
   end
 })
-
--- ========================
--- Terminal keymaps
--- ========================
-vim.keymap.set('t', '<Esc>', [[<C-\><C-n>]], { noremap = true })
-
 -- ========================
 -- Cleanup quit
 -- ========================
